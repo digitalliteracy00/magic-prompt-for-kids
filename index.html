@@ -1,4 +1,21 @@
-import { useState } from "react";
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 마법의 AI 주문서</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e8eaf0;font-family:'Noto Sans KR',sans-serif;font-size:16px;min-height:100vh}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
 
 const TOPICS = [
   { id:"env",     label:"🌱 환경보호",          desc:"지구를 지키는 우리의 약속",   color:"#00c897", bg:"#0d2b1e" },
@@ -20,33 +37,21 @@ const STEP_EX = {
   digital: ["올바른 디지털 생활에 대해 알려줘.","너는 디지털 교육 전문가야.","초등학교 6학년 학생이 이해할 만한 수준으로 작성해 줘.","재치있는 문구와 슬로건으로 만들어 줘.","카드뉴스 4장으로 만들어 줘.","출처를 확인해서, 모든 사람을 배려하는 표현으로 설명해 줘."],
 };
 
-// ── 미리 정해진 AI 결과물 ──
 const PRESET_RESULTS = {
   env: [
-    // 1단계: 어렵고 정리 안 된 결과
     `지구온난화로 인한 기후변화는 생태계 교란 및 탄소중립 달성에 심각한 영향을 미치고 있으며, 온실가스 배출량 감축을 위한 국제적 협약인 파리협정 하에서 각국의 NDC(국가결정기여) 이행이 요구되고 있다. 생물다양성 보전과 탄소흡수원 확보를 위한 산림보호 정책과 재생에너지 전환은 지속가능발전목표(SDGs) 달성의 핵심 요소로, 순환경제 체계 구축 및 탄소발자국 최소화 전략이 시급히 요청된다.`,
-    // 2단계: 전문가 말투, 여전히 어려움
     `첫째, 환경보호는 생태계 항상성 유지와 생물다양성 보전을 위한 필수적 과제로, 인위적 온실가스 배출로 인한 지구 평균기온 상승이 임계점을 초과할 경우 되돌릴 수 없는 환경 재앙이 도래할 수 있습니다. 둘째, 탄소중립 실현을 위해서는 재생에너지 전환, 에너지 효율화, 탄소포집 기술 개발 등 다각적 접근이 요구되며, 개인의 소비 행태 변화와 기업의 ESG 경영 도입이 병행되어야 합니다.`,
-    // 3단계: 초등학생 눈높이
     `• 환경보호란 우리가 사는 지구를 깨끗하고 건강하게 지키는 것이에요. 공기, 물, 흙이 오염되지 않도록 노력하는 모든 활동이 포함돼요!\n• 지구가 점점 뜨거워지는 이유는 자동차나 공장에서 나오는 나쁜 기체(이산화탄소) 때문이에요. 이걸 줄이면 지구가 시원해질 수 있어요.\n• 우리가 할 수 있는 환경보호: 쓰레기 분리수거, 물 아껴쓰기, 가까운 거리는 걷기, 일회용품 사용 줄이기!`,
-    // 4단계: 재치있는 슬로건
     `🌍 "지구는 렌탈이 아니에요, 우리 거예요!" — 환경보호는 선택이 아닌 필수! 지금 당장 시작해봐요.\n♻️ "쓰레기야, 네 자리로 돌아가!" — 분리수거 하나로 지구를 살릴 수 있어요. 재활용은 쓰레기의 화려한 재탄생!\n💧 "물 한 방울이 생명 한 방울!" — 양치할 때 컵 사용, 샤워 시간 줄이기. 작은 습관이 지구를 바꿔요!`,
-    // 5단계: 카드뉴스 4장
-    null, // 카드뉴스는 별도 처리
-    // 6단계: 윤리 원칙 적용 카드뉴스
-    null,
   ],
   digital: [
     `사이버불링, 디지털리터러시, 미디어리터러시, 개인정보보호법, 온라인플랫폼 규제 등 디지털 생활 전반에 걸친 윤리적 이슈가 증가하고 있으며, 스마트기기 과의존 현상은 청소년 정신건강에 부정적 영향을 미치고 있다. 메타버스, SNS, OTT 플랫폼 이용 증가로 인한 알고리즘 필터버블 현상과 허위정보 확산, 딥페이크 등의 문제가 심화되고 있어 디지털 시민성 교육이 시급히 요구된다.`,
     `첫째, 올바른 디지털 생활이란 스마트기기와 인터넷을 건전하고 책임감 있게 활용하는 것으로, 개인정보 보호 및 사이버 예절 준수가 핵심 요소입니다. 둘째, 디지털 과의존 예방을 위해 스크린 타임 관리, 오프라인 활동 병행, 미디어 리터러시 함양이 필요하며, 온라인상의 언어폭력 및 사이버불링에 대한 적극적 신고와 대처 방안 숙지가 요구됩니다.`,
     `• 올바른 디지털 생활이란 스마트폰, 컴퓨터를 똑똑하고 안전하게 사용하는 것이에요. 좋은 정보는 받아들이고, 나쁜 내용은 멀리해요!\n• 사이버 예절이 중요해요! 온라인에서도 상대방 얼굴이 안 보인다고 나쁜 말을 하면 안 돼요. 화면 너머에도 사람이 있어요.\n• 스마트폰을 너무 오래 쓰면 눈도 아프고 잠도 못 자요. 하루 사용 시간을 정해두는 게 좋아요!`,
     `📱 "좋아요보다 진짜 나를 좋아해!" — SNS 속 나보다 현실의 내가 더 소중해요. 스크린 내려놓고 친구랑 직접 만나봐요!\n🚫 "악플은 내 손가락이 저지른 범죄!" — 키보드 너머에도 감정이 있어요. 댓글 달기 전 한 번만 더 생각해봐요.\n🔒 "내 개인정보는 내 보물!" — 이름, 학교, 주소는 절대 온라인에 올리지 마세요. 내 정보는 내가 지켜요!`,
-    null,
-    null,
   ],
 };
 
-// 카드뉴스 데이터
 const PRESET_CARDS = {
   env: {
     5: [
@@ -70,8 +75,8 @@ const PRESET_CARDS = {
       { num:"4", title:"💡 똑똑한 디지털 생활 습관!", body:"잠자기 1시간 전엔 스마트폰을 내려놓아요.\n가짜 뉴스는 공유 전에 꼭 확인해요.\n디지털과 현실, 균형 있게 살아가요 😊" },
     ],
     6: [
-      { num:"1", title:"📰 가짜뉴스 구별법 (사실 확인✅)", body:"뉴스를 보면 출처를 꼭 확인해요! (언론사, 작성자)\n제목만 보고 공유하면 가짜뉴스가 퍼져요.\n팩트체크 사이트(팩트체크넷)를 활용해봐요!" },
-      { num:"2", title:"💬 온라인 예절 지키기 (존중💚)", body:"댓글 달기 전, '이 말이 상처가 될까?' 생각해봐요.\n이모티콘도 상대방이 오해할 수 있어요.\n온라인에서도 따뜻한 말 한마디가 힘이 돼요!" },
+      { num:"1", title:"📰 가짜뉴스 구별법 (사실 확인✅)", body:"뉴스를 보면 출처를 꼭 확인해요! (언론사, 작성자)\n제목만 보고 공유하면 가짜뉴스가 퍼져요.\n팩트체크 사이트를 활용해봐요!" },
+      { num:"2", title:"💬 온라인 예절 지키기 (존중💚)", body:"댓글 달기 전, '이 말이 상처가 될까?' 생각해봐요.\n온라인에서도 따뜻한 말 한마디가 힘이 돼요!\n서로 존중하는 디지털 세상을 만들어요." },
       { num:"3", title:"🔐 개인정보 보호하기 (보호💜)", body:"비밀번호는 주기적으로 바꾸고 남에게 알려주지 마요.\n공공 와이파이에서 중요한 정보 입력은 금지!\n내 사진도 함부로 올리지 않는 게 좋아요." },
       { num:"4", title:"⚖️ 디지털 세상의 다양한 목소리 (공정🌈)", body:"SNS 알고리즘은 내가 좋아하는 것만 보여줘요.\n다양한 의견을 찾아보는 습관을 길러요.\n나와 다른 생각도 존중하는 디지털 시민이 돼요!" },
     ],
@@ -155,11 +160,9 @@ function buildPrompt(topic, step, f, ethics) {
 }
 
 function Stars({ n }) {
-  return (
-    <span>
-      {[1,2,3,4,5].map(i => <span key={i} style={{ color:i<=n?"#f0c060":"#333", fontSize:16 }}>★</span>)}
-      <span style={{ color:"#888", fontSize:13, marginLeft:4 }}>{n}/5</span>
-    </span>
+  return React.createElement('span', null,
+    [1,2,3,4,5].map(i => React.createElement('span', { key:i, style:{ color:i<=n?"#f0c060":"#333", fontSize:16 } }, "★")),
+    React.createElement('span', { style:{ color:"#888", fontSize:13, marginLeft:4 } }, n+"/5")
   );
 }
 
@@ -222,9 +225,8 @@ function EvalCard({ g, step, color }) {
 function AIResult({ topic, step, color }) {
   var lb = ["🌱 씨앗","🌿 새싹","🌻 꽃봉오리","🌺 꽃","🌳 나무","⭐ 마스터"];
   var isCard = (step === 5 || step === 6);
-  var cards = isCard ? PRESET_CARDS[topic]?.[step] : null;
-  var text = !isCard ? PRESET_RESULTS[topic]?.[step - 1] : null;
-
+  var cards = isCard ? (PRESET_CARDS[topic] && PRESET_CARDS[topic][step]) : null;
+  var text = !isCard ? (PRESET_RESULTS[topic] && PRESET_RESULTS[topic][step-1]) : null;
   return (
     <div style={{ background:"#16181f", border:"2px solid "+color, borderRadius:14, padding:16, marginBottom:14 }}>
       <div style={{ color, fontWeight:700, fontSize:15, marginBottom:10 }}>🤖 AI 결과물 | {lb[step-1]} 단계 결과</div>
@@ -251,7 +253,7 @@ function AIResult({ topic, step, color }) {
   );
 }
 
-export default function App() {
+function App() {
   const [screen, setScreen] = useState("topic");
   const [topic, setTopic] = useState(null);
   const [step, setStep] = useState(1);
@@ -292,7 +294,6 @@ export default function App() {
     if (val !== "__custom__") { setField("format", val); setCustomFmt(""); }
     else setField("format", "");
   }
-  function showResult() { setShowed(true); }
   function goNext() {
     if (step < 6) { setStep(s => s+1); setShowed(false); setShowHint(false); setSelFmt(null); setCustomFmt(""); }
     else setDone(true);
@@ -349,7 +350,7 @@ export default function App() {
     <div style={S.page}>
       <div style={{ background:"#16181f", borderBottom:"1px solid #2a2d3a", padding:"12px 18px", display:"flex", alignItems:"center", gap:10 }}>
         <button onClick={() => setScreen("topic")} style={{ background:"#22253a", border:"none", color:"#aaa", borderRadius:8, padding:"6px 12px", cursor:"pointer", fontSize:14 }}>← 처음으로</button>
-        <span style={{ color:"#666", fontSize:14, flex:1 }}>{topicInfo?.label}</span>
+        <span style={{ color:"#666", fontSize:14, flex:1 }}>{topicInfo && topicInfo.label}</span>
         <span style={{ background:color+"22", border:"1px solid "+color, color, borderRadius:20, padding:"3px 12px", fontSize:13, fontWeight:700 }}>{sm.badge}</span>
       </div>
       <div style={{ background:"#16181f", padding:"10px 18px 12px", borderBottom:"1px solid #2a2d3a" }}>
@@ -382,7 +383,6 @@ export default function App() {
               <div style={{ width:38, height:38, borderRadius:"50%", background:color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:800, fontSize:18, color:"#0f1117", flexShrink:0 }}>{step}</div>
               <div style={{ fontWeight:800, fontSize:19 }}>{sm.title}</div>
             </div>
-
             <div style={S.card}>
               <div style={{ color, fontWeight:700, fontSize:15, marginBottom:6 }}>📌 학습 목표</div>
               <div style={{ color:"#c8d0e8", fontSize:15, lineHeight:1.8 }}>{sm.goal}</div>
@@ -393,26 +393,21 @@ export default function App() {
                   <span style={{ color:"#666", fontSize:13 }}>프롬프트 예시:<br/></span>{ex}
                 </div>
               </div>
-
               {step < 5 && (
                 <div style={{ marginTop:14 }}>
                   <div style={{ color, fontWeight:700, fontSize:15, marginBottom:8 }}>🎯 직접 입력해봐요:</div>
-                  <input value={getVal()} onChange={e => setVal(e.target.value)}
-                    placeholder={"예) " + ph} maxLength={80} style={S.input} />
+                  <input value={getVal()} onChange={e => setVal(e.target.value)} placeholder={"예) "+ph} maxLength={80} style={S.input} />
                   {step === 2 && meta && (
                     <div style={{ marginTop:8, display:"flex", flexWrap:"wrap", gap:6 }}>
                       {meta.roleOptions.map(r => (
                         <button key={r} onClick={() => setField("role", r)}
-                          style={{ background:"#22253a", border:"1px solid "+color+"55", color, borderRadius:20, padding:"5px 14px", fontSize:13, cursor:"pointer" }}>
-                          {r}
-                        </button>
+                          style={{ background:"#22253a", border:"1px solid "+color+"55", color, borderRadius:20, padding:"5px 14px", fontSize:13, cursor:"pointer" }}>{r}</button>
                       ))}
                     </div>
                   )}
                   <div style={{ fontSize:13, color:"#555", marginTop:6 }}>💬 직접 입력하거나 예시를 참고해봐요!</div>
                 </div>
               )}
-
               {step === 5 && (
                 <div style={{ marginTop:14 }}>
                   <div style={{ color, fontWeight:700, fontSize:15, marginBottom:10 }}>🎯 형식을 선택하세요:</div>
@@ -438,7 +433,6 @@ export default function App() {
                   )}
                 </div>
               )}
-
               {step === 6 && (
                 <div style={{ marginTop:14 }}>
                   <div style={{ color:"#aaa", fontWeight:700, fontSize:15, marginBottom:10 }}>✏️ 원칙을 선택하세요 (1개 이상):</div>
@@ -446,7 +440,7 @@ export default function App() {
                     var ck = ethics.includes(e.key);
                     return (
                       <label key={e.key} style={{ display:"flex", alignItems:"flex-start", gap:10, background:ck?e.color+"22":"#0f1117", border:"1.5px solid "+(ck?e.color:"#2a2d3a"), borderRadius:10, padding:"10px 12px", cursor:"pointer", marginBottom:8 }}>
-                        <input type="checkbox" checked={ck} onChange={() => setEthics(p => ck ? p.filter(x=>x!==e.key) : [...p, e.key])} style={{ marginTop:2, accentColor:e.color, width:16, height:16 }} />
+                        <input type="checkbox" checked={ck} onChange={() => setEthics(p => ck ? p.filter(x=>x!==e.key) : [...p,e.key])} style={{ marginTop:2, accentColor:e.color, width:16, height:16 }} />
                         <div>
                           <div style={{ fontWeight:700, color:e.color, fontSize:15 }}>{e.full}</div>
                           <div style={{ fontSize:14, color:"#888", marginTop:2 }}>"{e.phrase}"</div>
@@ -457,21 +451,17 @@ export default function App() {
                 </div>
               )}
             </div>
-
             <div style={{ marginBottom:14 }}>
               <div style={{ color, fontWeight:700, fontSize:14, marginBottom:6 }}>📋 현재까지 만든 프롬프트:</div>
               <div style={{ background:"#0f1117", border:"1px solid #2a2d3a", borderRadius:10, padding:"12px 14px", fontSize:15, color:"#c8d0e8", lineHeight:1.9, minHeight:48 }}>
                 {prompt || <span style={{ color:"#444" }}>아직 입력 내용이 없어요</span>}
               </div>
             </div>
-
             {!showHint && sm.hint && <button onClick={() => setShowHint(true)} style={{ width:"100%", marginBottom:10, padding:10, borderRadius:8, background:"none", border:"1px dashed #444", cursor:"pointer", color:"#888", fontSize:15 }}>💡 힌트 보기</button>}
             {showHint && sm.hint && <div style={{ background:"#1a1700", border:"1px solid #f0c060", borderRadius:10, padding:"10px 14px", marginBottom:10, fontSize:14, color:"#c8a040" }}><b>💡 힌트:</b> {sm.hint}</div>}
-
-            <button onClick={showResult} disabled={!canShow} style={S.btn(color, !canShow)}>
+            <button onClick={() => setShowed(true)} disabled={!canShow} style={S.btn(color, !canShow)}>
               🤖 AI 결과 확인하기
             </button>
-
             {showed && (
               <div>
                 <AIResult topic={topic} step={step} color={color} />
@@ -490,3 +480,8 @@ export default function App() {
     </div>
   );
 }
+
+ReactDOM.render(React.createElement(App), document.getElementById('root'));
+</script>
+</body>
+</html>
