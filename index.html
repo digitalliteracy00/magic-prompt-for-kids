@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 마법의 AI 주문서</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e8eaf0;font-family:'Noto Sans KR',sans-serif;font-size:16px;min-height:100vh}
+.wrap{max-width:540px;margin:0 auto;padding:16px 14px 60px}
+.topbar{background:#16181f;border-bottom:1px solid #2a2d3a;padding:12px 18px;display:flex;align-items:center;gap:10px}
+.card{background:#1a1d27;border:1.5px solid #2a2d3a;border-radius:14px;padding:18px;margin-bottom:14px}
+.guide-box{background:#0f1117;border-radius:10px;padding:14px 16px;margin-top:10px}
+.ex-box{background:#22253a;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:14px;color:#c8d0e8;line-height:1.8;font-style:italic}
+.prompt-box{background:#0f1117;border:1px solid #2a2d3a;border-radius:10px;padding:12px 14px;font-size:15px;color:#c8d0e8;line-height:1.9;margin-bottom:14px;min-height:48px;word-break:break-all}
+.field{width:100%;padding:12px 14px;border-radius:10px;background:#0f1117;color:#e8eaf0;font-size:16px;outline:none;border:1.5px solid #ccc}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:16px;margin-bottom:10px;color:#fff}
+.btn:disabled{background:#2a2d3a!important;color:#555;cursor:not-allowed}
+.chip{background:#22253a;border-radius:20px;padding:5px 14px;font-size:13px;cursor:pointer;margin:3px;border:1px solid #444;color:#aaa}
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.fmt-btn{background:#0f1117;border:1.5px solid #2a2d3a;border-radius:10px;padding:12px 10px;cursor:pointer;color:#aaa;font-size:14px;text-align:center;transition:all .2s}
+.ethic-row{display:flex;align-items:flex-start;gap:10px;border-radius:10px;padding:10px 12px;cursor:pointer;margin-bottom:8px;border:1.5px solid #2a2d3a;background:#0f1117}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.news-card{border-radius:12px;padding:12px}
+.hint-btn{width:100%;padding:10px;border-radius:8px;background:none;border:1px dashed #444;cursor:pointer;color:#888;font-size:15px;margin-bottom:10px}
+.topic-btn{width:100%;background:#0d2b1e;border:2px solid #00c897;border-radius:16px;padding:22px 20px;cursor:pointer;text-align:left;color:#e8eaf0;display:flex;align-items:center;gap:18px;margin-bottom:14px}
+.bar-bg{height:7px;background:#22253a;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar-fill{height:100%;border-radius:99px;transition:width .4s}
+.step-num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#0f1117;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var TOPICS=[
+  {id:"env",label:"🌱 환경보호",desc:"지구를 지키는 우리의 약속",color:"#00c897",bg:"#0d2b1e"},
+  {id:"digital",label:"📱 올바른 디지털 생활",desc:"스마트한 미디어 사용법",color:"#b388ff",bg:"#1a0d2b"}
+];
+var TOPIC_META={
+  env:{keyword:"환경보호",roleOptions:["환경 전문가","과학 선생님","뉴스 기자","환경운동가"],color:"#00c897"},
+  digital:{keyword:"올바른 디지털 생활",roleOptions:["디지털 교육 전문가","IT 선생님","유튜버","미디어 전문가"],color:"#b388ff"}
+};
+var FORMAT_OPTIONS=[
+  {label:"📰 카드뉴스 4장",value:"카드뉴스 4장으로 만들어 줘."},
+  {label:"📣 홍보 포스터",value:"홍보 포스터 형식으로 제목, 슬로건, 핵심 내용 3가지를 만들어 줘."},
+  {label:"📰 신문 기사",value:"신문 기사 형식으로 제목, 첫 문장, 본문, 마무리 순서로 작성해 줘."},
+  {label:"📋 안내문",value:"학교 안내문 형식으로 제목, 목적, 실천 방법 3가지, 마무리 인사 순으로 작성해 줘."},
+  {label:"🎤 발표 대본",value:"1분 발표 대본 형식으로 인사, 주제 소개, 핵심 내용 3가지, 마무리 순으로 작성해 줘."},
+  {label:"✏️ 직접 입력",value:"__custom__"}
+];
+var STEP_EX={
+  env:["환경보호에 대해 알려줘.","너는 환경 전문가야.","초등학교 6학년 학생이 이해할 만한 수준으로 작성해 줘.","재치있는 문구와 슬로건으로 만들어 줘.","카드뉴스 4장으로 만들어 줘.","출처를 확인해서, 모든 사람을 배려하는 표현으로 설명해 줘."],
+  digital:["올바른 디지털 생활에 대해 알려줘.","너는 디지털 교육 전문가야.","초등학교 6학년 학생이 이해할 만한 수준으로 작성해 줘.","재치있는 문구와 슬로건으로 만들어 줘.","카드뉴스 4장으로 만들어 줘.","출처를 확인해서, 모든 사람을 배려하는 표현으로 설명해 줘."]
+};
+var ETHICS=[
+  {key:"사",full:"사 : 사실",phrase:"출처를 확인해서 설명해 줘.",color:"#4da6ff"},
+  {key:"존",full:"존 : 존중",phrase:"모든 사람을 배려하는 표현을 사용해 줘.",color:"#00c897"},
+  {key:"보",full:"보 : 보호",phrase:"개인정보는 포함하지 마.",color:"#b388ff"},
+  {key:"안",full:"안 : 안전",phrase:"위험한 행동은 제외해 줘.",color:"#ffb74d"},
+  {key:"공",full:"공 : 공정",phrase:"여러 관점을 함께 설명해 줘.",color:"#ff7070"}
+];
+var CC=[
+  {bg:"#0d2b1e",border:"#00c897",text:"#00c897"},
+  {bg:"#0d1e2b",border:"#4da6ff",text:"#4da6ff"},
+  {bg:"#2b1a0d",border:"#ffb74d",text:"#ffb74d"},
+  {bg:"#1a0d2b",border:"#b388ff",text:"#b388ff"}
+];
+var STEPS=[
+  {num:1,title:"주제 정하기",badge:"🌱 씨앗 단계",goal:"AI에게 어떤 내용을 알고 싶은지 주제를 알려줘요!",gt:"가이드: 주제를 어떻게 입력할까?",gi:["알고 싶은 주제를 직접 입력해요","짧고 명확하게 쓸수록 좋아요!"],hint:"알고 싶은 주제를 그대로 적어봐요!"},
+  {num:2,title:"역할 정하기",badge:"🌿 새싹 단계",goal:"AI에게 구체적인 역할을 주면 더 전문적인 답변을 받을 수 있어요!",gt:"가이드: 어떤 역할로 설정할까?",gi:["환경 전문가, 과학 선생님, 뉴스 기자...","역할에 따라 설명 방식이 달라져요!"],hint:"AI에게 전문가 역할을 주면 더 자세한 답변이 나와요!"},
+  {num:3,title:"대상 정하기",badge:"🌻 꽃봉오리 단계",goal:"누구를 위한 결과물인지 알려주면 AI가 더 알맞은 내용을 만들어요!",gt:"가이드: 대상을 어떻게 입력할까?",gi:["읽을 사람을 구체적으로 써요","예) 초등학생, 어린이, 학부모..."],hint:"읽을 사람이 누구인지 알려주면 더 맞춤형 답변이 나와요!"},
+  {num:4,title:"조건 정하기",badge:"🌺 꽃 단계",goal:"어떻게 설명해 줄지 조건을 붙이면 결과가 확 달라져요!",gt:"가이드: 조건을 어떻게 입력할까?",gi:["말투·분위기·스타일을 구체적으로 정해봐요","예) 재치있는 문구로, 슬로건 형식으로..."],hint:"조건을 바꾸면 AI 결과 분위기가 확 달라져요!"},
+  {num:5,title:"형식 정하기",badge:"🌳 나무 단계",goal:"결과물의 형태를 알려주면 AI가 딱 맞는 형식으로 만들어줘요!",gt:"가이드: 어떤 형식으로 만들까?",gi:["아래에서 형식을 골라보세요!","형식에 따라 AI 결과물이 완전히 달라져요!"],hint:"형식을 정해주면 AI가 딱 그 형태로 만들어 줘요!"},
+  {num:6,title:"윤리 원칙 적용",badge:"⭐ 마스터 단계",goal:"AI를 올바르게 사용하는 5가지 원칙! 사존보안공을 프롬프트에 넣어봐요!",gt:"가이드: 사존보안공이란?",gi:["사실·존중·보호·안전·공정의 앞글자를 딴 원칙이에요","1개 이상 선택해서 프롬프트에 추가해봐요!"],hint:null}
+];
+var GUIDE={
+  env:[
+    {fail:"환경보호 알려줘",fr:["주제만 있고 역할, 대상, 조건, 형식이 없어요","AI가 어떤 수준으로 설명해야 할지 몰라요"],stars:[2,1,2,3],ec:"아직 윤리 원칙이 없어요. 사실인지 확인하거나 모두를 존중하는 표현을 추가해보세요!",tip:"알고 싶은 주제를 그대로 적어봐요!",up:"너는 환경 전문가야. 초등학교 6학년이 이해할 수 있게, 재치있는 문구로 환경보호 카드뉴스 4장을 만들어 줘. 출처를 확인해서 설명해 줘.",ss:{role:"환경 전문가",task:"환경보호 설명",rule:"초등학생 눈높이",format:"카드뉴스 4장"},sn:"너는 환경 전문가야. 초등학교 6학년이 이해할 수 있게, 재치있는 문구로 환경보호 카드뉴스 4장을 만들어 줘.",sr:["역할·대상·조건·형식을 모두 갖추니 AI가 방향을 정확히 잡아요","단계별 요소를 추가할수록 결과가 점점 더 좋아져요"]},
+    {fail:"환경 전문가로서 환경보호 알려줘",fr:["역할이 있지만 대상(누구에게)이 빠져 있어요","조건이 없어서 설명 방식이 여전히 불분명해요"],stars:[3,2,3,3],ec:"역할은 잘 정했어요! 다음엔 '존중'하는 표현을 추가해보세요.",tip:"역할 뒤에 '초등학교 6학년 학생에게'처럼 대상을 추가해봐요!",up:"너는 환경 전문가야. 초등학교 6학년 학생에게 환경보호를 쉽고 친근하게 설명해 줘.",ss:{role:"환경 전문가",task:"환경보호 설명",rule:"초등학생 눈높이",format:"카드뉴스"},sn:"너는 환경 전문가야. 초등학교 6학년을 대상으로 환경보호를 쉽게 설명해 줘.",sr:["역할을 정하니 AI가 전문가처럼 신뢰감 있게 설명해줘요","전문가 역할이 있으면 내용이 훨씬 구체적이고 풍부해져요"]},
+    {fail:"너는 환경 전문가야. 환경보호에 대해 알려줘.",fr:["역할은 있지만 누구에게 설명할지(대상)가 없어요","대상이 없으면 수준이 맞지 않아요"],stars:[3,3,3,3],ec:"대상을 정확히 썼어요! '개인정보는 포함하지 마'처럼 보호 원칙도 추가해보세요.",tip:"'초등학교 6학년이 이해할 만한 수준으로'처럼 구체적으로 써봐요!",up:"너는 환경 전문가야. 초등학교 6학년이 이해할 수 있게, 쉬운 단어로 환경보호를 설명해 줘.",ss:{role:"환경 전문가",task:"환경보호 설명",rule:"초등학생 눈높이, 쉬운 단어",format:"카드뉴스"},sn:"너는 환경 전문가야. 초등학교 6학년이 이해할 수 있는 쉬운 단어로 환경보호를 설명해 줘.",sr:["대상을 추가하니 AI가 초등학생 눈높이에 딱 맞게 설명해줘요","어려운 단어가 쉬운 말로 바뀌어서 훨씬 이해하기 쉬워졌어요"]},
+    {fail:"너는 환경 전문가야. 환경보호에 대해 초등학교 6학년 수준으로 알려줘.",fr:["역할과 대상은 있지만 어떤 스타일로 쓸지(조건)가 없어요","조건이 없으면 AI가 평범하게 설명해서 재미없어요"],stars:[4,4,4,3],ec:"조건을 잘 썼어요! '위험한 행동은 제외해 줘'처럼 안전 원칙도 추가해봐요.",tip:"'재치있는 슬로건으로'처럼 구체적인 스타일을 써봐요!",up:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호를 설명해 줘.",ss:{role:"환경 전문가",task:"환경보호 설명",rule:"재치있는 슬로건",format:"카드뉴스"},sn:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호를 설명해 줘.",sr:["조건을 구체적으로 쓰니 AI가 슬로건으로 생동감 있게 만들어줘요","말투 조건 하나로 결과 분위기가 완전히 달라져요"]},
+    {fail:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호를 설명해 줘.",fr:["역할·대상·조건은 있지만 형식이 없어요","형식이 없으면 AI가 그냥 글로만 써줘요"],stars:[4,4,4,4],ec:"형식까지 완성! '여러 관점을 함께 설명해 줘'처럼 공정 원칙도 넣어봐요.",tip:"형식을 선택하거나 직접 입력해봐요!",up:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호 카드뉴스 4장을 만들어 줘.",ss:{role:"환경 전문가",task:"환경보호 설명",rule:"재치있는 슬로건",format:"카드뉴스 4장"},sn:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호 카드뉴스 4장을 만들어 줘.",sr:["형식까지 갖추니 결과물이 훨씬 깔끔하게 정돈돼요","원하는 모양으로 딱 나와요"]},
+    {fail:"환경보호 카드뉴스 4장 만들어줘",fr:["윤리 원칙이 없으면 AI가 한쪽 관점만 설명할 수 있어요","출처 없이 틀린 정보가 나올 수도 있어요"],stars:[5,5,5,5],ec:"완벽해요! 사·존·보·안·공 원칙을 모두 잘 반영했어요. 진짜 AI 마스터예요! 🌟",tip:"마지막에 윤리 문장을 꼭 추가해봐요!",up:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호 카드뉴스 4장을 만들어 줘. 출처를 확인하고, 모두를 배려하는 표현으로, 개인정보 없이, 여러 관점을 함께 설명해 줘.",ss:{role:"환경 전문가",task:"환경보호 설명",rule:"재치있는 슬로건 + 윤리 원칙",format:"카드뉴스 4장"},sn:"너는 환경 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 환경보호 카드뉴스 4장을 만들어 줘. 출처를 확인하고, 모든 사람을 배려하는 표현을 써줘.",sr:["윤리 원칙을 추가하니 더 신뢰할 수 있고 안전한 결과가 나와요","사존보안공 원칙이 AI를 올바른 방향으로 안내해줘요"]}
+  ],
+  digital:[
+    {fail:"디지털 생활 알려줘",fr:["주제만 있고 역할, 대상, 조건, 형식이 없어요","AI가 어떤 수준으로 설명해야 할지 몰라요"],stars:[2,1,2,3],ec:"아직 윤리 원칙이 없어요. 개인정보 보호나 안전한 표현을 추가해봐요!",tip:"'올바른 디지털 생활에 대해 알려줘'처럼 구체적으로 써봐요!",up:"너는 디지털 교육 전문가야. 초등학교 6학년이 이해할 수 있게, 재치있는 문구로 올바른 디지털 생활 카드뉴스 4장을 만들어 줘.",ss:{role:"디지털 교육 전문가",task:"올바른 디지털 생활 설명",rule:"초등학생 눈높이",format:"카드뉴스 4장"},sn:"너는 디지털 교육 전문가야. 초등학교 6학년이 이해할 수 있게, 재치있는 문구로 올바른 디지털 생활 카드뉴스 4장을 만들어 줘.",sr:["역할·대상·조건·형식을 모두 갖추니 AI가 방향을 정확히 잡아요","단계별 요소를 추가할수록 결과가 점점 더 좋아져요"]},
+    {fail:"IT 선생님으로서 디지털 생활 알려줘",fr:["역할이 있지만 대상이 빠져 있어요","조건이 없어서 설명 방식이 불분명해요"],stars:[3,2,3,3],ec:"역할은 잘 정했어요! '위험한 행동은 제외해 줘'처럼 안전 원칙을 추가해보세요.",tip:"역할 뒤에 '초등학교 6학년 학생에게'처럼 대상을 추가해봐요!",up:"너는 IT 선생님이야. 초등학교 6학년 학생에게 올바른 디지털 생활을 쉽고 친근하게 설명해 줘.",ss:{role:"IT 선생님",task:"디지털 생활 설명",rule:"초등학생 눈높이",format:"카드뉴스"},sn:"너는 IT 선생님이야. 초등학교 6학년을 대상으로 올바른 디지털 생활을 쉽게 설명해 줘.",sr:["역할을 정하니 AI가 전문가처럼 신뢰감 있게 설명해줘요","IT 전문가 역할이 있으면 내용이 훨씬 구체적이고 풍부해져요"]},
+    {fail:"너는 디지털 교육 전문가야. 올바른 디지털 생활에 대해 알려줘.",fr:["역할은 있지만 누구에게 설명할지(대상)가 없어요","수준이 맞지 않을 수 있어요"],stars:[3,3,3,3],ec:"대상을 정확히 썼어요! '개인정보는 포함하지 마'처럼 보호 원칙도 추가해보세요.",tip:"'초등학교 6학년이 이해할 만한 수준으로'처럼 구체적으로 써봐요!",up:"너는 디지털 교육 전문가야. 초등학교 6학년이 이해할 수 있게, 쉬운 단어로 올바른 디지털 생활을 설명해 줘.",ss:{role:"디지털 교육 전문가",task:"디지털 생활 설명",rule:"초등학생 눈높이, 쉬운 단어",format:"카드뉴스"},sn:"너는 디지털 교육 전문가야. 초등학교 6학년이 이해할 수 있는 쉬운 단어로 올바른 디지털 생활을 설명해 줘.",sr:["대상을 추가하니 AI가 초등학생 눈높이에 딱 맞게 설명해줘요","어려운 단어가 쉬운 말로 바뀌어 이해하기 쉬워졌어요"]},
+    {fail:"너는 디지털 교육 전문가야. 초등학교 6학년 수준으로 디지털 생활 알려줘.",fr:["역할과 대상은 있지만 어떤 스타일로 쓸지(조건)가 없어요","조건이 없으면 평범하게 설명해서 재미없어요"],stars:[4,4,4,3],ec:"조건을 잘 썼어요! '위험한 행동은 제외해 줘'처럼 안전 원칙도 추가해봐요.",tip:"'재치있는 슬로건으로'처럼 구체적인 스타일을 써봐요!",up:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 올바른 디지털 생활을 설명해 줘.",ss:{role:"디지털 교육 전문가",task:"디지털 생활 설명",rule:"재치있는 슬로건",format:"카드뉴스"},sn:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 올바른 디지털 생활을 설명해 줘.",sr:["조건을 구체적으로 쓰니 AI가 슬로건으로 생동감 있게 만들어줘요","말투 조건 하나로 결과 분위기가 완전히 달라져요"]},
+    {fail:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 디지털 생활 설명해 줘.",fr:["역할·대상·조건은 있지만 형식이 없어요","형식이 없으면 원하는 모양이 안 나와요"],stars:[4,4,4,4],ec:"형식까지 완성! '여러 관점을 함께 설명해 줘'처럼 공정 원칙도 넣어봐요.",tip:"형식을 선택하거나 직접 입력해봐요!",up:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 올바른 디지털 생활 카드뉴스 4장을 만들어 줘.",ss:{role:"디지털 교육 전문가",task:"디지털 생활 설명",rule:"재치있는 슬로건",format:"카드뉴스 4장"},sn:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 올바른 디지털 생활 카드뉴스 4장을 만들어 줘.",sr:["형식까지 갖추니 결과물이 훨씬 깔끔하게 정돈돼요","원하는 모양으로 딱 나와요"]},
+    {fail:"디지털 생활 카드뉴스 4장 만들어줘",fr:["윤리 원칙이 없으면 한쪽 관점만 설명할 수 있어요","개인정보 보호나 안전 내용이 빠질 수 있어요"],stars:[5,5,5,5],ec:"완벽해요! 사·존·보·안·공 원칙을 모두 잘 반영했어요. 진짜 AI 마스터예요! 🌟",tip:"마지막에 '개인정보는 포함하지 마', '여러 관점을 함께' 같은 윤리 문장을 꼭 추가해봐요!",up:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 올바른 디지털 생활 카드뉴스 4장을 만들어 줘. 출처를 확인하고, 개인정보 없이, 위험한 행동은 제외하고, 여러 관점을 함께 설명해 줘.",ss:{role:"디지털 교육 전문가",task:"디지털 생활 설명",rule:"재치있는 슬로건 + 윤리 원칙",format:"카드뉴스 4장"},sn:"너는 디지털 교육 전문가야. 초등학교 6학년을 위해 재치있는 슬로건으로 올바른 디지털 생활 카드뉴스 4장을 만들어 줘. 개인정보는 포함하지 말고, 위험한 행동은 제외해 줘.",sr:["윤리 원칙을 추가하니 더 신뢰할 수 있고 안전한 결과가 나와요","사존보안공 원칙이 AI를 올바른 방향으로 안내해줘요"]}
+  ]
+};
+
+var st={screen:"topic",topic:null,step:1,subject:"",role:"",target:"",condition:"",format:"",ethicsChecked:[],aiResult:"",loading:false,called:false,showHint:false,done:false,selFmt:null,customFmt:""};
+
+function getPrompt(){
+  var m=TOPIC_META[st.topic];if(!m)return"";
+  var s=st.subject;if(!s)return"";
+  var p=[];
+  if(st.step>=2&&st.role)p.push("[역할] 너는 "+st.role+"야.");
+  if(st.step>=5){
+    p.push("[주제] "+s);
+    if(st.target)p.push("[대상] "+st.target);
+    if(st.condition)p.push("[조건] "+st.condition+"으로");
+    if(st.format)p.push("[형식] "+st.format);
+  }else if(st.step===4){
+    p.push("[주제] "+s);
+    if(st.target)p.push("[대상] "+st.target);
+    p.push("[조건] "+(st.condition||"")+"으로 알려줘.");
+  }else if(st.step===3){
+    p.push("[주제] "+s);
+    p.push("[대상] "+(st.target||"")+" 알려줘.");
+  }else{
+    p.push("[주제] "+s);
+  }
+  if(st.step===6&&st.ethicsChecked.length>0)
+    ETHICS.filter(function(e){return st.ethicsChecked.includes(e.key);}).forEach(function(e){p.push(e.phrase);});
+  return p.join(" ");
+}
+
+function getSys(){
+  var b="당신은 초등학교 6학년 교육용 AI입니다. 폭력·혐오·개인정보·위험 내용은 절대 포함하지 마세요.";
+  var q=["주제에 대해 형식 없이 나열하세요. 전문 용어를 많이 쓰고, 문단 구분 없이 어린이가 읽기 어렵게 3~4문장으로 써주세요.","전문가 말투로 격식 있고 딱딱하게 두 항목으로 나눠 설명하세요. 전문 용어를 유지하되 초등학생이 읽기엔 어려운 수준으로 써주세요.","초등학교 6학년 눈높이에 맞게 어려운 용어를 쉬운 말로 바꿔 세 항목으로 친근하게 설명하세요.","요청한 조건(재치, 슬로건 등)을 강하게 반영해 각 항목마다 캐치프레이즈를 넣고 느낌표와 생동감 있는 표현으로 세 항목을 써주세요.","요청한 형식에 맞게 정확히 작성하세요. 카드뉴스라면 [카드N] 제목\\n내용 형식으로, 포스터라면 제목/슬로건/내용, 기사라면 제목/본문 형식으로. 형식 외 다른 설명은 쓰지 마세요.","요청한 형식에 맞게 작성하되 사실·존중·보호·안전·공정 원칙을 반영하세요. 형식 외 다른 설명은 쓰지 마세요."];
+  return b+"\n\n"+q[st.step-1];
+}
+
+function parseCards(txt){
+  var m=[...txt.matchAll(/\[카드(\d)\]\s*([^\n]+)\n([\s\S]*?)(?=\[카드\d\]|$)/g)];
+  if(m.length>=2)return m.map(function(x){return{num:x[1],title:x[2].trim(),body:x[3].trim()};});
+  return null;
+}
+
+async function doAI(){
+  if(st.loading)return;
+  var p=getPrompt();
+  if(!p.trim())return;
+  if(st.step===6&&st.ethicsChecked.length===0)return;
+  st.loading=true;st.aiResult="";st.called=false;draw();
+  try{
+    var r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:getSys(),messages:[{role:"user",content:p}]})
+    });
+    var d=await r.json();
+    st.aiResult=d&&d.content?d.content.map(function(b){return b.text||"";}).join(""):"결과를 불러오지 못했어요.";
+    st.called=true;
+  }catch(e){st.aiResult="AI 연결에 실패했어요.";st.called=true;}
+  st.loading=false;draw();
+}
+
+function stars(n){
+  var h="";
+  for(var i=1;i<=5;i++)h+='<span style="color:'+(i<=n?"#f0c060":"#333")+';font-size:16px">★</span>';
+  return h+'<span style="color:#888;font-size:13px;margin-left:4px">'+n+'/5</span>';
+}
+
+function evalHTML(g,step,c){
+  if(!g)return"";
+  var sl=["말이 잘 통하나요? (명확성)","힌트가 충분한가요? (구체성)","멋진 결과가 나올까요? (성공 가능성)","수호천사 규칙을 지켰나요? (윤리성)"];
+  var ss=step===6?'<div style="background:#0d2b1e;border-radius:10px;padding:14px;margin-bottom:12px">'+
+    '<div style="color:#00c897;font-weight:700;font-size:15px;margin-bottom:8px">✅ 마법이 성공한 주문</div>'+
+    '<div style="color:#aaa;font-size:12px;margin-bottom:6px">📋 나누어 쓰기 버전</div>'+
+    Object.entries(g.ss).map(function(e,i){var l=["역할","할 일","지키기","모양"];return'<div style="color:#c8d0e8;font-size:13px;line-height:1.9">- {'+l[i]+'} : '+e[1]+'</div>';}).join("")+
+    '<div style="background:#22253a;border-radius:8px;padding:10px 12px;margin:8px 0"><div style="color:#aaa;font-size:12px;margin-bottom:4px">✍️ 이어서 쓰기 버전</div>'+
+    '<div style="color:#e8eaf0;font-size:13px;font-style:italic;line-height:1.8">"'+g.sn+'"</div></div>'+
+    '<div style="color:#00c897;font-size:13px;font-weight:600;margin-bottom:4px">⭐ 왜 성공했을까?</div>'+
+    g.sr.map(function(r){return'<div style="color:#ccc;font-size:13px;line-height:1.8">✔ '+r+'</div>';}).join("")+'</div>':"";
+  return'<div style="background:#12141e;border:1.5px solid '+c+';border-radius:14px;padding:18px;margin-bottom:14px">'+
+    '<div style="color:'+c+';font-weight:800;font-size:16px;margin-bottom:14px">🧙‍♂️ '+step+'단계 마법 주문서 채점 결과!</div>'+
+    '<div style="background:#1a1d27;border-radius:10px;padding:14px;margin-bottom:12px">'+
+      '<div style="color:#ff7070;font-weight:700;font-size:15px;margin-bottom:8px">❌ 마법이 실패한 주문</div>'+
+      '<div style="color:#aaa;font-size:13px;margin-bottom:6px"><i>"'+g.fail+'"</i></div>'+
+      '<div style="color:#ff9090;font-size:13px;font-weight:600;margin-bottom:4px">⚠️ 왜 실패했을까?</div>'+
+      g.fr.map(function(r){return'<div style="color:#ccc;font-size:13px;line-height:1.8">- '+r+'</div>';}).join("")+'</div>'+
+    ss+
+    '<div style="background:#1a1d27;border-radius:10px;padding:14px;margin-bottom:12px">'+
+      '<div style="color:#f0c060;font-weight:700;font-size:15px;margin-bottom:10px">📊 마법 능력치 분석</div>'+
+      sl.map(function(l,i){return'<div style="margin-bottom:8px"><div style="color:#c8d0e8;font-size:13px;margin-bottom:3px"><b>'+l+'</b></div>'+stars(g.stars[i])+'</div>';}).join("")+
+      '<div style="margin-top:10px;background:#0f1117;border-radius:8px;padding:10px 12px">'+
+        '<div style="color:#b388ff;font-size:13px;font-weight:600;margin-bottom:4px">🛡️ 윤리 원칙 피드백</div>'+
+        '<div style="color:#aaa;font-size:13px;line-height:1.8">'+g.ec+'</div></div></div>'+
+    '<div style="background:#1a1000;border:1px solid #f0c060;border-radius:10px;padding:14px;margin-bottom:12px">'+
+      '<div style="color:#f0c060;font-weight:700;font-size:15px;margin-bottom:6px">🧠 오늘부터 써먹는 마법 비결</div>'+
+      '<div style="color:#d0c080;font-size:13px;font-style:italic;line-height:1.8">"'+g.tip+'"</div></div>'+
+    '<div style="background:#0d1e2b;border-radius:10px;padding:14px">'+
+      '<div style="color:#4da6ff;font-weight:700;font-size:15px;margin-bottom:8px">💡 마법사 트레이너의 업그레이드 제안</div>'+
+      '<div style="color:#aaa;font-size:12px;margin-bottom:6px">이렇게 바꾸면 더 멋진 결과가 나와요!</div>'+
+      '<div style="background:#22253a;border-radius:8px;padding:10px 12px">'+
+        '<div style="color:#c8d0e8;font-size:13px;font-style:italic;line-height:1.8">"'+g.up+'"</div></div></div></div>';
+}
+
+function aiBox(c){
+  var lb=["🌱 씨앗","🌿 새싹","🌻 꽃봉오리","🌺 꽃","🌳 나무","⭐ 마스터"];
+  var inner="";
+  if(st.loading){inner='<div style="text-align:center;padding:20px 0;color:#555;font-size:15px">⏳ AI가 생각하는 중...</div>';}
+  else{
+    var cards=parseCards(st.aiResult);
+    if(st.step>=5&&cards){
+      inner='<div style="font-size:13px;color:#666;margin-bottom:10px">📰 카드뉴스 '+cards.length+'장 완성!</div>'+
+        '<div class="card-grid">'+cards.map(function(x,i){var cl=CC[i%4];return'<div class="news-card" style="background:'+cl.bg+';border:2px solid '+cl.border+'">'+
+          '<div style="font-size:11px;font-weight:700;color:'+cl.text+';margin-bottom:4px">Card '+x.num+'</div>'+
+          '<div style="font-size:14px;font-weight:700;color:#e8eaf0;margin-bottom:6px">'+x.title+'</div>'+
+          '<div style="font-size:13px;color:#aaa;line-height:1.7;white-space:pre-line">'+x.body+'</div></div>';}).join("")+'</div>';
+    }else{inner='<div style="font-size:14px;color:#c8d0e8;line-height:1.9;white-space:pre-wrap;background:#0f1117;border-radius:10px;padding:10px 12px">'+st.aiResult+'</div>';}
+  }
+  return'<div style="background:#16181f;border:2px solid '+c+';border-radius:14px;padding:16px;margin-bottom:14px">'+
+    '<div style="color:'+c+';font-weight:700;font-size:15px;margin-bottom:10px">🤖 AI 결과물 | '+lb[st.step-1]+' 단계 결과</div>'+inner+'</div>';
+}
+
+function draw(){
+  var app=document.getElementById("app");
+  var m=st.topic?TOPIC_META[st.topic]:null;
+  var c=m?m.color:"#00c897";
+  var sm=STEPS[st.step-1];
+  var g=st.topic?GUIDE[st.topic][st.step-1]:null;
+  var pr=getPrompt();
+  var ti=TOPICS.find(function(t){return t.id===st.topic;});
+  var pct=Math.round(st.step/6*100);
+  var ex=st.topic?STEP_EX[st.topic][st.step-1]:"";
+
+  if(st.screen==="topic"){
+    app.innerHTML='<div style="background:#16181f;border-bottom:1px solid #2a2d3a;padding:20px 18px;text-align:center">'+
+      '<div style="font-size:12px;color:#666;letter-spacing:1px;margin-bottom:4px">🏫 교육용 프로그램 · 초등학교 6학년</div>'+
+      '<div style="font-size:24px;font-weight:800;color:#e8eaf0">✨ 마법의 AI 주문서</div>'+
+      '<div style="font-size:14px;color:#888;margin-top:4px">AI 프롬프트를 단계별로 배워봐요</div></div>'+
+      '<div class="wrap">'+
+        '<div class="card" style="background:#1a1700;border-color:#f0c060">'+
+          '<div style="color:#f0c060;font-weight:700;font-size:15px;margin-bottom:6px">🎯 오늘의 목표</div>'+
+          '<div style="color:#d0c080;font-size:15px;line-height:1.8">주제를 선택하고 6단계를 완성하면<br>나만의 <b style="color:#f0c060">결과물</b>이 완성돼요!<br><span style="font-size:13px;color:#888">프롬프트 5요소 + 윤리 5원칙(사존보안공) 학습</span></div></div>'+
+        '<div style="font-size:15px;color:#aaa;margin-bottom:12px;font-weight:600">📌 주문서 주제를 선택하세요</div>'+
+        TOPICS.map(function(t){return'<button class="topic-btn" style="background:'+t.bg+';border-color:'+t.color+'" onclick="pick(\''+t.id+'\')">'+
+          '<span style="font-size:40px">'+t.label.split(" ")[0]+'</span>'+
+          '<div><div style="font-weight:800;font-size:18px;color:'+t.color+';margin-bottom:4px">'+t.label.replace(/^[^\s]+\s/,"")+'</div>'+
+          '<div style="font-size:14px;color:#aaa">'+t.desc+'</div></div>'+
+          '<span style="margin-left:auto;color:'+t.color+';font-size:22px">→</span></button>';}).join("")+
+        '<div style="margin-top:20px;background:#16181f;border-radius:10px;padding:10px 14px;font-size:13px;color:#555;line-height:1.7;border:1px solid #2a2d3a">🔒 교육용 프로그램 · 개인정보 미수집 · 안전한 AI 응답만 제공</div>'+
+      '</div>';
+    return;
+  }
+
+  // 입력 섹션
+  var inp="";
+  if(st.step<5){
+    var val=st.step===1?st.subject:st.step===2?st.role:st.step===3?st.target:st.condition;
+    var ph="예) "+(m?m.keyword:"");
+    var chips=st.step===2&&m?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">'+m.roleOptions.map(function(r){return'<button class="chip" style="border-color:'+c+'55;color:'+c+'" onclick="setRole(\''+r+'\')">'+r+'</button>';}).join("")+'</div>':"";
+    inp='<div style="margin-top:14px"><div style="color:'+c+';font-weight:700;font-size:15px;margin-bottom:8px">🎯 직접 입력해봐요:</div>'+
+      '<input class="field" id="fi" style="border-color:'+c+'" value="'+val.replace(/"/g,'&quot;')+'" placeholder="'+ph+'" maxlength="80" oninput="onInp(this.value)">'+chips+
+      '<div style="font-size:13px;color:#555;margin-top:6px">💬 직접 입력하거나 예시를 참고해봐요!</div></div>';
+  }else if(st.step===5){
+    var fb=FORMAT_OPTIONS.map(function(o){var sel=st.selFmt===o.value;return'<button class="fmt-btn" style="background:'+(sel?c+"33":"#0f1117")+';border-color:'+(sel?c:"#2a2d3a")+';color:'+(sel?c:"#aaa")+';font-weight:'+(sel?700:400)+'" onclick="selFmt(\''+o.value.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')">'+o.label+'</button>';}).join("");
+    var ci=st.selFmt==="__custom__"?'<input class="field" style="border-color:'+c+'" value="'+st.customFmt.replace(/"/g,'&quot;')+'" placeholder="예) 편지 형식으로 써줘." maxlength="60" oninput="onCust(this.value)">':'';
+    var si=st.selFmt&&st.selFmt!=="__custom__"?'<div style="background:#0f1117;border-radius:8px;padding:8px 12px;font-size:13px;color:#aaa;margin-top:4px">선택된 형식: <span style="color:'+c+'">'+st.selFmt+'</span></div>':"";
+    inp='<div style="margin-top:14px"><div style="color:'+c+';font-weight:700;font-size:15px;margin-bottom:10px">🎯 형식을 선택하세요:</div>'+
+      '<div class="fmt-grid">'+fb+'</div>'+ci+si+'</div>';
+  }else if(st.step===6){
+    inp='<div style="margin-top:14px"><div style="color:#aaa;font-weight:700;font-size:15px;margin-bottom:10px">✏️ 원칙을 선택하세요 (1개 이상):</div>'+
+      ETHICS.map(function(e){var ck=st.ethicsChecked.includes(e.key);return'<div class="ethic-row" style="background:'+(ck?e.color+"22":"#0f1117")+';border-color:'+(ck?e.color:"#2a2d3a")+'" onclick="togE(\''+e.key+'\')">'+
+        '<input type="checkbox" '+(ck?"checked":"")+' style="margin-top:2px;accent-color:'+e.color+';width:16px;height:16px;pointer-events:none">'+
+        '<div><div style="font-weight:700;color:'+e.color+';font-size:15px">'+e.full+'</div>'+
+        '<div style="font-size:14px;color:#888;margin-top:2px">"'+e.phrase+'"</div></div></div>';}).join("")+'</div>';
+  }
+
+  var dis=st.loading||(st.step===6&&st.ethicsChecked.length===0)||!pr.trim();
+  var hint=sm.hint?(st.showHint?'<div style="background:#1a1700;border:1px solid #f0c060;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:14px;color:#c8a040"><b>💡 힌트:</b> '+sm.hint+'</div>':
+    '<button class="hint-btn" onclick="st.showHint=true;draw()">💡 힌트 보기</button>'):"";
+  var nxt=st.called&&!st.loading?'<div style="background:#0d2b1e;border:1px solid #00c897;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:15px;color:#00c897">'+
+    (st.step<6?"✅ 좋아요! 다음 단계에서 프롬프트를 더 발전시켜봐요!":"⭐ 훌륭해요! 윤리 원칙까지 완성했어요!")+'</div>'+
+    '<button class="btn" style="background:'+(st.step<6?"#1a6b2a":"#5b3fa8")+'" onclick="next()">'+(st.step<6?"➡️ "+(st.step+1)+"단계로 가기!":"🎉 최종 결과물 완성!")+'</button>':"";
+
+  var main=st.done?
+    '<div style="background:#0d2b1e;border:2px solid #00c897;border-radius:14px;padding:24px;text-align:center;margin-bottom:14px">'+
+      '<div style="font-size:38px;margin-bottom:8px">🎉</div>'+
+      '<div style="font-weight:800;font-size:20px;color:#00c897">프롬프트 마스터 완성!</div>'+
+      '<div style="font-size:15px;color:#aaa;margin-top:6px">6단계를 모두 완성했어요!</div></div>'+
+    '<div class="card"><div style="color:#aaa;font-weight:700;font-size:15px;margin-bottom:8px">📝 최종 완성 프롬프트</div>'+
+      '<div style="background:#22253a;border-radius:8px;padding:10px 14px;font-size:15px;color:#c8d0e8;line-height:1.8;font-style:italic">'+pr+'</div></div>'+
+    (st.aiResult?aiBox(c):"")+
+    '<button class="btn" style="background:#5b3fa8" onclick="st.screen=\'topic\';draw()">🔄 다른 주제로 도전하기</button>'
+  :
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'+
+      '<div class="step-num" style="background:'+c+'">'+st.step+'</div>'+
+      '<div style="font-weight:800;font-size:19px;color:#e8eaf0">'+sm.title+'</div></div>'+
+    '<div class="card">'+
+      '<div style="color:'+c+';font-weight:700;font-size:15px;margin-bottom:6px">📌 학습 목표</div>'+
+      '<div style="color:#c8d0e8;font-size:15px;line-height:1.8">'+sm.goal+'</div>'+
+      '<div class="guide-box"><div style="color:'+c+';font-weight:700;font-size:14px;margin-bottom:8px">💡 '+sm.gt+'</div>'+
+        sm.gi.map(function(x){return'<div style="color:#aaa;font-size:14px;line-height:1.8">✓ '+x+'</div>';}).join("")+
+        '<div class="ex-box"><span style="color:#666;font-size:13px">프롬프트 예시:<br></span>'+ex+'</div></div>'+
+      inp+'</div>'+
+    '<div style="margin-bottom:14px"><div style="color:'+c+';font-weight:700;font-size:14px;margin-bottom:6px">📋 현재까지 만든 프롬프트:</div>'+
+      '<div class="prompt-box">'+(pr||'<span style="color:#444">아직 입력 내용이 없어요</span>')+'</div></div>'+
+    hint+
+    '<button class="btn" style="background:'+(dis?"#2a2d3a":c)+';color:'+(dis?"#555":"#fff")+'" '+(dis?"disabled":"")+' onclick="doAI()">'+
+      (st.loading?"⏳ AI가 생각하는 중...":"🤖 AI 결과 확인하기")+'</button>'+
+    ((st.aiResult||st.loading)?aiBox(c):"")+
+    (st.called&&!st.loading?evalHTML(g,st.step,c):"")+nxt;
+
+  app.innerHTML=
+    '<div class="topbar">'+
+      '<button style="background:#22253a;border:none;color:#aaa;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px" onclick="st.screen=\'topic\';draw()">← 처음으로</button>'+
+      '<span style="color:#666;font-size:14px;flex:1;margin-left:8px">'+(ti?ti.label:"")+'</span>'+
+      '<span style="background:'+c+'22;border:1px solid '+c+';color:'+c+';border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700">'+sm.badge+'</span></div>'+
+    '<div style="background:#16181f;padding:10px 18px 12px;border-bottom:1px solid #2a2d3a">'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:6px">'+
+        STEPS.map(function(s){return'<span style="color:'+(st.step>=s.num?c:"#444")+';font-weight:'+(st.step===s.num?700:400)+'">'+s.num+'단계</span>';}).join("")+'</div>'+
+      '<div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,#1a6b2a,'+c+')"></div></div></div>'+
+    '<div class="wrap">'+main+'</div>';
+}
+
+function pick(id){Object.assign(st,{screen:"game",topic:id,step:1,subject:"",role:"",target:"",condition:"",format:"",ethicsChecked:[],aiResult:"",loading:false,called:false,showHint:false,done:false,selFmt:null,customFmt:""});draw();}
+function onInp(v){if(st.step===1)st.subject=v;else if(st.step===2)st.role=v;else if(st.step===3)st.target=v;else if(st.step===4)st.condition=v;var p=document.querySelector(".prompt-box");if(p){var pr=getPrompt();p.innerHTML=pr||'<span style="color:#444">아직 입력 내용이 없어요</span>';}var fi=document.getElementById("fi");if(fi){var pos=fi.selectionStart;setTimeout(function(){try{fi.setSelectionRange(pos,pos);}catch(e){}},0);}}
+function setRole(r){st.role=r;draw();}
+function selFmt(v){st.selFmt=v;if(v!=="__custom__"){st.format=v;st.customFmt="";}else{st.format="";}draw();}
+function onCust(v){st.customFmt=v;st.format=v;var p=document.querySelector(".prompt-box");if(p){var pr=getPrompt();p.innerHTML=pr||'<span style="color:#444">아직 입력 내용이 없어요</span>';}}
+function togE(k){var i=st.ethicsChecked.indexOf(k);if(i>=0)st.ethicsChecked.splice(i,1);else st.ethicsChecked.push(k);draw();}
+function next(){if(st.step<6){Object.assign(st,{step:st.step+1,aiResult:"",called:false,showHint:false,selFmt:null,customFmt:""});}else st.done=true;draw();}
+draw();
+</script>
+</body>
+</html>
